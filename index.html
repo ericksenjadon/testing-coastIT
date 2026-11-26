@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Website</title>
+  <meta name="description" content="A static website deployed automatically from GitHub to an autoscaled VM fleet.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">Deployed from GitHub</p>
+    <h1>Hello from the cloud.</h1>
+    <p class="lede">This page lives in a Git repository. Every push to <code>main</code> updates the servers behind it, and the fleet grows or shrinks with demand.</p>
+    <a class="button" href="#how">How it works</a>
+  </header>
+
+  <main>
+    <section id="how">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><strong>Edit</strong> a file in <code>site/</code> and push to GitHub.</li>
+        <li><strong>GitHub Actions</strong> uploads the files to a private storage bucket.</li>
+        <li><strong>Every VM</strong> pulls the latest files within a minute.</li>
+        <li><strong>Autoscaling</strong> adds VMs under load and removes them when traffic drops.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <p>Build: <span id="build">loading…</span></p>
+  </footer>
+
+  <script>
+    fetch("version.txt", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(function (t) { document.getElementById("build").textContent = t.trim().slice(0, 7); })
+      .catch(function () { document.getElementById("build").textContent = "local"; });
+  </script>
+</body>
+</html>
