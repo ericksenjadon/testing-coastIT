@@ -1,544 +1,579 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#2338f5">
-  <title>Coinslot: quick games, real rivalries</title>
-  <meta name="description" content="Short multiplayer games you can finish on a lunch break, with a scoreboard that resets every Monday.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap">
-  <style>
-    :root {
-      --cobalt: #2338f5;
-      --ink: #0e0b2b;
-      --paper: #f6f4ff;
-      --butter: #ffd84d;
-      --hot: #ff4f7b;
-      --mist: #dfe3ff;
-      --display: "Bowlby One", "Arial Black", Impact, sans-serif;
-      --body: "Bricolage Grotesque", system-ui, "Segoe UI", sans-serif;
-      --shadow: 6px 6px 0 var(--ink);
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BCW Home</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<style>
+  /* Layout concept: black broadcast nav, a slim stats band, then bordered dashboard cards in two rows (two wide cards, then four tall ones) with a green outline glow. Gold marks names and champions. */
+  :root {
+    --bg: #090c0a;
+    --card: #040605;
+    --panel: #121713;
+    --panel2: #1a211b;
+    --line: #29322b;
+    --fg: #f1f5f1;
+    --muted: #9aa79c;
+    --accent: #22c55e;
+    --accentfg: #04130a;
+    --gold: #f5c518;
+    --nav: #040605;
+    --navfg: #f1f5f1;
+    --heel: #f2685b;
+    --face: #4cc3ff;
+    --tween: #f5b73d;
+    --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+    --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #eef2ed; --card: #ffffff; --panel: #ffffff; --panel2: #e6ece5; --line: #cfd8cd;
+      --fg: #0f1511; --muted: #526055; --accent: #15803d; --accentfg: #ffffff; --gold: #946200;
+      --heel: #c2362a; --face: #0a74b8; --tween: #a8680a;
+      color-scheme: light;
     }
+  }
+  :root[data-theme="light"] {
+    --bg: #eef2ed; --card: #ffffff; --panel: #ffffff; --panel2: #e6ece5; --line: #cfd8cd;
+    --fg: #0f1511; --muted: #526055; --accent: #15803d; --accentfg: #ffffff; --gold: #946200;
+    --heel: #c2362a; --face: #0a74b8; --tween: #a8680a;
+    color-scheme: light;
+  }
+  body { background-color: var(--bg); background-image: radial-gradient(ellipse 70% 40% at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent); background-repeat: no-repeat; color: var(--fg); font-family: var(--font-body); font-size: 16px; margin: 0; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--nav); }
+  .gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .cap { max-width: 1480px; margin-left: auto; margin-right: auto; }
+  .card { background: var(--card); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 0 36px color-mix(in srgb, var(--accent) 14%, transparent); }
+  .stripes { background-image: repeating-linear-gradient(115deg, transparent 0 26px, color-mix(in srgb, var(--accent) 12%, transparent) 26px 30px); }
+  .noscroll { scrollbar-width: none; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  .slim { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .rise { animation: rise 0.28s ease-out both; }
+</style>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: { bg: "var(--bg)", card: "var(--card)", panel: "var(--panel)", panel2: "var(--panel2)", line: "var(--line)", fg: "var(--fg)", muted: "var(--muted)", accent: "var(--accent)", accentfg: "var(--accentfg)", gold: "var(--gold)", nav: "var(--nav)", navfg: "var(--navfg)", heel: "var(--heel)", face: "var(--face)", tween: "var(--tween)" },
+      fontFamily: { display: "var(--font-display)", body: "var(--font-body)", mono: "var(--font-mono)" }
+    } }
+  };
+</script>
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-
-    body {
-      margin: 0;
-      background: var(--cobalt);
-      color: var(--paper);
-      font: 400 1.0625rem/1.55 var(--body);
-    }
-
-    a { color: inherit; }
-    :focus-visible { outline: 3px solid var(--butter); outline-offset: 3px; }
-    .panel :focus-visible { outline-color: var(--ink); }
-
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-
-    /* ---------- header ---------- */
-    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; flex-wrap: wrap; }
-    .logo { display: flex; align-items: center; gap: 10px; font: 1.5rem/1 var(--display); text-decoration: none; }
-    .coin {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--butter); border: 3px solid var(--ink);
-      display: grid; place-items: center;
-    }
-    .coin::after { content: ""; width: 4px; height: 14px; background: var(--ink); border-radius: 2px; }
-    .nav { display: flex; gap: 24px; }
-    .nav a { font-weight: 600; text-decoration: none; padding: 4px 0; border-bottom: 3px solid transparent; }
-    .nav a:hover { border-bottom-color: var(--butter); }
-
-    /* ---------- shared bits ---------- */
-    .btn {
-      display: inline-block; padding: 12px 22px;
-      font: 800 1rem/1.2 var(--body); text-decoration: none; text-align: center;
-      color: var(--ink); background: var(--butter);
-      border: 3px solid var(--ink); border-radius: 999px; box-shadow: 3px 3px 0 var(--ink);
-      cursor: pointer; transition: transform .08s, box-shadow .08s;
-    }
-    .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
-    .btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
-    .btn.hot { background: var(--hot); }
-    .btn.small { padding: 8px 16px; font-size: .95rem; }
-    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: 3px 3px 0 var(--ink); }
-
-    .panel { background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 10px; box-shadow: var(--shadow); }
-
-    h1, h2 { font-family: var(--display); font-weight: 400; margin: 0; letter-spacing: .01em; }
-    h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.1; margin-bottom: 24px; }
-    h3 { margin: 0; font-size: 1.15rem; line-height: 1.2; font-weight: 800; }
-    p { margin: 0; }
-    .block { padding-top: 72px; }
-
-    /* ---------- hero ---------- */
-    .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; padding: 32px 0 24px; }
-    .hero h1 { font-size: clamp(2.6rem, 7vw, 4.8rem); line-height: 1; }
-    .hero .lede { margin: 24px 0 32px; max-width: 34ch; font-size: 1.2rem; }
-    .hero .cta { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-    .hero .cta a.link { font-weight: 600; }
-
-    .cab { padding: 20px; }
-    .cab-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
-    .cab-head h2 { font-size: 1.5rem; margin: 0; }
-    .cab-head span { font-size: .9rem; color: #4a4670; }
-    .hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .hud div { background: var(--ink); color: var(--butter); border-radius: 6px; padding: 6px 12px; }
-    .hud b { display: block; font: 1.7rem/1.1 var(--display); font-weight: 400; font-variant-numeric: tabular-nums; }
-    .hud small { font-size: .8rem; color: var(--mist); }
-
-    .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; }
-    .cell {
-      aspect-ratio: 1; padding: 0; cursor: pointer;
-      background: var(--mist); border: 3px solid var(--ink); border-radius: 8px;
-    }
-    .cell:disabled { cursor: default; }
-    .cell:not(:disabled):active { transform: scale(.94); }
-    .cell.lit { background: var(--butter); box-shadow: inset 0 0 0 7px var(--hot); }
-    @media (prefers-reduced-motion: no-preference) {
-      .cell.lit { animation: pop .14s ease-out; }
-      @keyframes pop { from { transform: scale(.85); } to { transform: scale(1); } }
-    }
-    .cab-foot { display: flex; align-items: center; gap: 16px; }
-    #msg { font-size: .95rem; min-height: 2.9em; flex: 1; }
-
-    /* ---------- games ---------- */
-    .games { padding: 28px; }
-    .feature { display: grid; grid-template-columns: 180px 1fr; gap: 28px; align-items: center; padding-bottom: 28px; }
-    .feature p { margin: 8px 0 16px; max-width: 52ch; }
-    .art { border: 3px solid var(--ink); border-radius: 8px; aspect-ratio: 1; }
-    .row {
-      display: grid; grid-template-columns: 64px 1fr auto auto; gap: 18px; align-items: center;
-      padding: 16px 0; border-top: 2px solid var(--ink);
-    }
-    .row .art { width: 64px; height: 64px; border-radius: 6px; }
-    .row p { font-size: .95rem; color: #3a3660; }
-    .row .meta { font-size: .95rem; text-align: right; color: #3a3660; }
-
-    .a-lantern { background: radial-gradient(circle at 50% 58%, var(--butter) 0 17%, #ff9f43 18% 26%, transparent 27%), repeating-linear-gradient(90deg, #1b1760 0 14px, var(--ink) 14px 28px); }
-    .a-tide    { background: repeating-radial-gradient(circle at 0 100%, #19c3a6 0 8px, #0b6b5c 8px 16px); }
-    .a-brick   { background: linear-gradient(var(--ink) 0 0) 0 33% / 100% 3px no-repeat, linear-gradient(var(--ink) 0 0) 0 66% / 100% 3px no-repeat, repeating-linear-gradient(90deg, var(--hot) 0 30px, var(--ink) 30px 33px); }
-    .a-glimmer { background: conic-gradient(var(--butter) 25%, var(--paper) 0 50%, var(--butter) 0 75%, var(--paper) 0) 0 0 / 50% 50%; }
-    .a-rocket  { background: repeating-linear-gradient(135deg, var(--cobalt) 0 14px, var(--paper) 14px 20px, var(--hot) 20px 34px, var(--paper) 34px 40px); }
-    .a-moth    { background: radial-gradient(circle at 70% 30%, var(--paper) 0 8%, var(--butter) 9% 20%, transparent 40%), linear-gradient(160deg, #2b2570, var(--ink)); }
-
-    /* ---------- scores ---------- */
-    .split { display: grid; grid-template-columns: 1.1fr .9fr; gap: 32px; align-items: start; }
-    .scores { padding: 8px 24px 20px; }
-    .scores table { width: 100%; border-collapse: collapse; }
-    .scores caption { text-align: left; font-weight: 800; padding: 16px 0 8px; }
-    .scores th { text-align: left; font-weight: 600; font-size: .9rem; color: #4a4670; padding: 6px 0; border-bottom: 3px solid var(--ink); }
-    .scores td { padding: 12px 0; border-bottom: 2px solid var(--mist); font-variant-numeric: tabular-nums; }
-    .scores th:last-child, .scores td:last-child { text-align: right; }
-    .scores tr.leader td { background: var(--butter); border-bottom-color: var(--butter); }
-    .scores tr.leader td:first-child { padding-left: 10px; }
-    .scores tr.leader td:last-child { padding-right: 10px; }
-    .scores td:first-child { width: 3.2em; font-family: var(--display); }
-
-    .event { padding: 24px; background: var(--butter); }
-    .event .date { font: 2.6rem/1 var(--display); }
-    .event h3 { margin-top: 12px; font-size: 1.3rem; }
-    .event p { margin: 8px 0 20px; }
-
-    /* ---------- footer ---------- */
-    footer { margin-top: 88px; padding: 28px 0 48px; border-top: 3px solid var(--ink); background: rgba(14, 11, 43, .25); }
-    footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-size: .92rem; }
-    footer dl { display: flex; gap: 24px; margin: 0; flex-wrap: wrap; }
-    footer dt { display: inline; color: var(--mist); }
-    footer dd { display: inline; margin: 0 0 0 6px; font-weight: 600; }
-
-    /* ---------- hidden load tester (add ?loadtest to the address) ---------- */
-    .lt { padding: 24px; }
-    .lt .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; align-items: end; margin: 16px 0; }
-    .lt label { display: grid; gap: 6px; font-size: .9rem; }
-    .lt select { font: inherit; padding: 8px 10px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink); }
-    .lt input[type=range] { width: 100%; accent-color: var(--cobalt); }
-    .lt .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-    .lt .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 8px; }
-    .lt .stats div { background: var(--ink); color: var(--butter); border-radius: 8px; padding: 10px; text-align: center; }
-    .lt .stats b { display: block; font: 1.4rem/1.1 var(--display); font-weight: 400; font-variant-numeric: tabular-nums; }
-    .lt .stats small { color: var(--mist); }
-    .lt ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
-    .lt li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; background: var(--mist); border-radius: 6px; }
-
-    /* ---------- small screens ---------- */
-    @media (max-width: 860px) {
-      .hero { grid-template-columns: 1fr; gap: 36px; }
-      .split { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      .games { padding: 20px; }
-      .feature { grid-template-columns: 1fr; }
-      .feature .art { max-width: 140px; }
-      .row { grid-template-columns: 64px 1fr; }
-      .row .meta { grid-column: 2; text-align: left; }
-      .row .btn { grid-column: 2; justify-self: start; }
-      .nav { gap: 16px; }
-    }
-  </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="top">
-      <a class="logo" href="#top" id="top"><span class="coin" aria-hidden="true"></span>Coinslot</a>
-      <nav class="nav" aria-label="Main">
-        <a href="#games">Games</a>
-        <a href="#scores">Scores</a>
-        <a href="#events">Events</a>
-      </nav>
+<div id="root"></div>
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useEffect, useRef } = React;
+const { ROSTER, TITLES, TITLE_DETAILS, RANKINGS, STORIES } = window.BCW;
+
+const ALIGN = { heel: "Heel", face: "Face", tween: "Tween" };
+const NAV = [["Home", "index.html"], ["Roster", "roster.html"], ["Titles", "roster.html#titles"], ["Rankings", "#rankings"], ["Stories", "#stories"], ["Calendar", "#events"]];
+const STREAMS = [
+  ["BCW Network", "Every premium live event, plus the full archive, on any device."],
+  ["Arena+", "Weekly shows live in your region with replays for 30 days."],
+  ["How to Watch", "Find where each show and event streams in your country."],
+];
+const FOOT = {
+  Corporate: ["Corporate", "Careers", "Impact"],
+  "BCW.com": ["News", "Videos", "Photos", "Priority Pass"],
+  About: ["Terms of Use", "Privacy Policy", "Copyright", "Your Privacy Choices"],
+  Help: ["Club FAQs", "Contact Us", "Security", "Cookie Policy"],
+};
+const STORE_KEY = "bcw-special-events";
+
+/* ---------- Helpers ---------- */
+const pad = (n) => String(n).padStart(2, "0");
+const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fmtDate = (s) => new Date(s + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const loadEvents = () => { try { const v = JSON.parse(localStorage.getItem(STORE_KEY)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const saveEvents = (list) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch (e) {} };
+
+/* ---------- Icons ---------- */
+const Icon = ({ d, size = 20, className = "", fill = "none" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true"><path d={d} /></svg>
+);
+const I = {
+  menu: "M4 6h16M4 12h16M4 18h16",
+  close: "M18 6 6 18M6 6l12 12",
+  right: "M9 18l6-6-6-6",
+  left: "M15 18l-6-6 6-6",
+  arrow: "M5 12h14M13 6l6 6-6 6",
+  down: "M6 9l6 6 6-6",
+  sun: "M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4",
+  play: "M6 4l14 8-14 8z",
+  trash: "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6",
+  cal: "M3 5h18v16H3zM3 10h18M8 3v4M16 3v4",
+};
+
+/* ---------- Shared pieces ---------- */
+function AlignPill({ a }) {
+  return <span className={`inline-block border px-2 py-0.5 font-display text-sm font-bold uppercase tracking-wider text-${a} border-${a}`}>{ALIGN[a]}</span>;
+}
+
+function Card({ id, title, children, footer, className = "" }) {
+  return (
+    <section id={id} aria-labelledby={`${id}-h`} className={`card scroll-mt-24 flex flex-col p-5 sm:p-7 min-w-0 ${className}`}>
+      <h2 id={`${id}-h`} className="font-display text-3xl sm:text-[2rem] font-bold uppercase tracking-[0.14em] leading-tight">{title}</h2>
+      <span className="block mt-3 mb-5 h-[3px] w-12 bg-accent" aria-hidden="true" />
+      <div className="flex-1 min-h-0 flex flex-col">{children}</div>
+      {footer && <div className="mt-5 pt-4 border-t border-line">{footer}</div>}
+    </section>
+  );
+}
+
+function GoLink({ href, onClick, children }) {
+  const cls = "inline-flex items-center gap-1.5 text-sm font-medium text-fg hover:text-accent transition-colors group";
+  const inner = <>{children}<Icon d={I.arrow} size={16} className="transition-transform group-hover:translate-x-1" /></>;
+  return href ? <a href={href} className={cls}>{inner}</a> : <button onClick={onClick} className={cls}>{inner}</button>;
+}
+
+/* ---------- Header ---------- */
+function Header({ onToggleTheme }) {
+  const [menu, setMenu] = useState(false);
+  const [watch, setWatch] = useState(false);
+  const watchRef = useRef(null);
+  useEffect(() => {
+    if (!watch) return;
+    const close = (e) => { if (watchRef.current && !watchRef.current.contains(e.target)) setWatch(false); };
+    const esc = (e) => { if (e.key === "Escape") setWatch(false); };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
+  }, [watch]);
+  return (
+    <header className="sticky z-50 bg-nav text-navfg border-b border-line" style={{ top: "env(safe-area-inset-top, 0px)" }}>
+      <div className="gut">
+        <div className="cap flex h-16 items-center gap-4">
+          <button className="lg:hidden -ml-2 p-2 rounded hover:bg-white/10 transition-colors" aria-label={menu ? "Close menu" : "Open menu"} aria-expanded={menu} onClick={() => setMenu(!menu)}>
+            <Icon d={menu ? I.close : I.menu} size={24} />
+          </button>
+          <a href="index.html" className="flex items-center gap-2 font-display text-[2.1rem] font-extrabold tracking-wide leading-none" aria-label="BCW home">
+            <span className="inline-block h-6 w-2.5 -skew-x-12 bg-accent" aria-hidden="true" />BCW
+          </a>
+          <nav aria-label="Main" className="hidden lg:flex items-center gap-1 ml-6">
+            {NAV.map(([n, href]) => {
+              const on = n === "Home";
+              return (
+                <a key={n} href={href} aria-current={on ? "page" : undefined}
+                  className={`relative px-3 py-2 font-display text-lg font-semibold uppercase tracking-wide transition-colors hover:text-accent ${on ? "text-accent" : ""}`}>
+                  {n}
+                  {on && <span className="absolute left-3 right-3 -bottom-[13px] h-[3px] bg-accent" />}
+                </a>
+              );
+            })}
+          </nav>
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <div className="relative" ref={watchRef}>
+              <button onClick={() => setWatch(!watch)} aria-expanded={watch} aria-haspopup="true"
+                className="flex items-center gap-1.5 rounded-sm bg-accent text-accentfg px-3 sm:px-4 py-2 font-display font-bold uppercase tracking-wide text-base hover:brightness-110 active:brightness-90 transition">
+                <Icon d={I.play} size={14} fill="currentColor" /> Watch <Icon d={I.down} size={16} className={`transition-transform ${watch ? "rotate-180" : ""}`} />
+              </button>
+              {watch && (
+                <div className="rise absolute right-0 mt-3 w-[min(92vw,22rem)] bg-panel text-fg border border-line shadow-2xl rounded-sm p-2">
+                  {STREAMS.map(([t, d]) => (
+                    <a key={t} href="#" onClick={(e) => e.preventDefault()} className="block p-3 rounded-sm hover:bg-panel2 focus-visible:bg-panel2 transition-colors">
+                      <span className="block font-display text-xl font-bold uppercase">{t}</span>
+                      <span className="block text-sm text-muted">{d}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button onClick={onToggleTheme} aria-label="Switch light or dark theme" className="p-2 rounded hover:bg-white/10 transition-colors hover:text-accent"><Icon d={I.sun} size={22} /></button>
+          </div>
+        </div>
+      </div>
+      {menu && (
+        <nav aria-label="Mobile" className="lg:hidden border-t border-line bg-nav rise">
+          <div className="gut">
+            <ul className="cap py-2">
+              {NAV.map(([n, href]) => (
+                <li key={n}>
+                  <a href={href} onClick={() => setMenu(false)} className={`flex items-center justify-between py-3 border-b border-line font-display text-2xl font-semibold uppercase ${n === "Home" ? "text-accent" : ""}`}>
+                    {n}<Icon d={I.right} size={18} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      )}
     </header>
+  );
+}
 
-    <main>
-      <section class="hero" aria-labelledby="hero-h">
-        <div>
-          <h1 id="hero-h">Quick games. Real rivalries.</h1>
-          <p class="lede">Matches you can finish on a lunch break, and a scoreboard that resets every Monday.</p>
-          <div class="cta">
-            <a class="btn hot" href="#games">Pick a game</a>
-            <a class="link" href="#scores">See this week's scores</a>
+/* ---------- Stats band ---------- */
+function Band({ upcoming }) {
+  const holders = new Set(TITLES.flatMap((t) => t.holders)).size;
+  const stats = [[ROSTER.length, "Competitors"], [holders, "Champions"], [STORIES.filter((s) => s.status === "Active").length, "Active stories"], [upcoming, "Upcoming events"]];
+  return (
+    <section className="stripes border-b border-line bg-panel">
+      <div className="gut">
+        <div className="cap py-8 sm:py-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-display text-lg font-semibold uppercase tracking-[0.2em] text-accent">Welcome to BCW</p>
+            <h1 className="font-display text-5xl sm:text-7xl font-extrabold uppercase leading-[0.9] tracking-tight">Home</h1>
+          </div>
+          <div className="grid grid-cols-2 sm:flex gap-x-8 gap-y-3 font-display uppercase">
+            {stats.map(([n, l]) => (
+              <div key={l}>
+                <p className="text-4xl sm:text-5xl font-extrabold leading-none tabular-nums">{n}</p>
+                <p className="text-sm tracking-widest text-muted">{l}</p>
+              </div>
+            ))}
           </div>
         </div>
+      </div>
+    </section>
+  );
+}
 
-        <div class="panel cab" aria-labelledby="sr-h">
-          <div class="cab-head">
-            <h2 id="sr-h">Spark Rush</h2>
-            <span>Hit the glowing square. 20 seconds.</span>
-          </div>
-          <div class="hud">
-            <div><small>Score</small><b id="g-score">0</b></div>
-            <div><small>Time left</small><b id="g-time">20.0</b></div>
-            <div><small>Your best</small><b id="g-best">0</b></div>
-          </div>
-          <div class="board" id="board" role="group" aria-label="Spark Rush board"></div>
-          <div class="cab-foot">
-            <button type="button" class="btn hot" id="g-start">Start game</button>
-            <p id="msg" aria-live="polite">Press Start, then click each glowing square as fast as you can.</p>
-          </div>
-        </div>
-      </section>
+/* ---------- Top row ---------- */
+function RosterSnapshot() {
+  return (
+    <Card id="snapshot" title="Roster Snapshot" footer={<GoLink href="roster.html#roster">Go to Roster</GoLink>}>
+      <ul className="divide-y divide-line">
+        {ROSTER.map((p) => (
+          <li key={p.id}>
+            <a href="roster.html#roster" className="group flex items-center gap-3 sm:gap-4 py-3 hover:bg-panel2 transition-colors">
+              <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full font-display text-2xl font-extrabold text-white" style={{ background: `linear-gradient(160deg, hsl(${p.hue} 45% 32%), hsl(${p.hue} 50% 10%))` }}>{p.name[0]}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-2xl font-bold uppercase leading-none text-gold group-hover:text-accent transition-colors truncate">{p.name}</span>
+                <span className="block mt-0.5 text-sm text-muted tabular-nums">{p.record.w}W {p.record.l}L {p.record.d}D</span>
+              </span>
+              <AlignPill a={p.alignment} />
+              <span className="w-14 text-right font-mono font-bold tabular-nums">{p.winRate}%</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
 
-      <section class="block" id="games" aria-labelledby="games-h">
-        <h2 id="games-h">Pick a game</h2>
-        <div class="panel games">
-          <div class="feature">
-            <div class="art a-lantern" role="img" aria-label="A lantern glowing in a dark corridor"></div>
-            <div>
-              <h3>Lanternfall</h3>
-              <p>Team up with up to three friends and carry one lantern through a collapsing dungeon. Whoever holds the light can see the traps, so you'll want to pass it often. A run takes about 15 minutes.</p>
-              <a class="btn" href="#">Play Lanternfall</a>
+function Divisions() {
+  const groups = useMemo(() => {
+    const map = {};
+    ROSTER.forEach((p) => p.ranked.forEach((r) => {
+      (map[r.division] = map[r.division] || { division: r.division, title: r.title, entries: [] }).entries.push({ rank: r.rank, name: p.name });
+    }));
+    return Object.values(map).map((g) => ({ ...g, entries: g.entries.sort((a, b) => a.rank - b.rank) }));
+  }, []);
+  return (
+    <Card id="divisions" title="Ranked Divisions" footer={<GoLink href="roster.html#titles">Go to Titles</GoLink>}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {groups.map((g) => (
+          <div key={g.division} className="border border-line p-4 rounded-lg bg-panel">
+            <h3 className="font-display text-2xl font-bold uppercase leading-tight">{g.division}</h3>
+            <p className="text-sm text-muted mb-3">{g.title}</p>
+            <ol className="space-y-1.5">
+              {g.entries.map((e) => (
+                <li key={e.name} className="flex items-center gap-3">
+                  <span className="grid place-items-center h-8 w-10 bg-accent text-accentfg font-display text-xl font-extrabold tabular-nums">#{e.rank}</span>
+                  <span className="font-display text-2xl font-bold text-gold">{e.name}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/* ---------- Bottom row ---------- */
+function Champions() {
+  const held = TITLES.filter((t) => t.holders.length > 0);
+  return (
+    <Card id="champions" title="Current Champions" footer={<GoLink href="roster.html#titles">Go to Titles</GoLink>}>
+      <ul className="slim max-h-[26rem] overflow-y-auto space-y-3 pr-1">
+        {held.map((t) => {
+          const d = TITLE_DETAILS[t.name];
+          return (
+            <li key={t.name} className="border border-line rounded-lg bg-panel p-4">
+              <h3 className="font-display text-2xl font-bold leading-tight">{t.name}</h3>
+              <p className="mt-1 font-display text-2xl font-bold text-gold leading-tight">{t.holders.join(" & ")}</p>
+              {d && (
+                <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-1 text-sm">
+                  <div><dt className="inline text-muted">Reign: </dt><dd className="inline font-medium tabular-nums">{d.reign}</dd></div>
+                  <div><dt className="inline text-muted">Last Defense: </dt><dd className="inline font-medium">{d.lastDefense}</dd></div>
+                </dl>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </Card>
+  );
+}
+
+function Rankings() {
+  const rows = RANKINGS.slice().sort((a, b) => a.rank - b.rank);
+  return (
+    <Card id="rankings" title="Top 10 Rankings" footer={<GoLink href="roster.html#roster">Go to Roster</GoLink>}>
+      <ol className="slim max-h-[26rem] overflow-y-auto pr-1">
+        {rows.map((r) => (
+          <li key={r.rank} className="flex items-baseline gap-3 py-3.5 border-b border-line last:border-b-0">
+            <span className="w-9 shrink-0 font-mono text-sm text-muted tabular-nums">#{r.rank}</span>
+            <span className="flex-1 min-w-0 truncate font-display text-[1.7rem] font-bold leading-none text-gold">{r.name}</span>
+            <span className="font-mono text-lg font-bold tabular-nums">{r.score.toFixed(2)}</span>
+          </li>
+        ))}
+      </ol>
+    </Card>
+  );
+}
+
+function Stories() {
+  const [full, setFull] = useState(false);
+  return (
+    <Card id="stories" title="Top Stories" footer={<GoLink onClick={() => setFull(!full)}>{full ? "Show short previews" : "Read full stories"}</GoLink>}>
+      <ul className="slim max-h-[26rem] overflow-y-auto pr-1 divide-y divide-line">
+        {STORIES.map((s) => (
+          <li key={s.title} className="py-4 first:pt-0">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="font-display text-2xl font-bold leading-tight">{s.title}</h3>
+              <span className={`shrink-0 border rounded-full px-3 py-0.5 text-xs font-medium ${s.status === "Active" ? "border-accent text-accent" : "border-line text-muted"}`}>{s.status}</span>
             </div>
-          </div>
+            <p className={`mt-2 text-fg leading-snug ${full ? "" : "line-clamp-2"}`}>{s.text}</p>
+            <p className="mt-2 flex flex-wrap gap-x-3 text-sm font-medium text-accent">{s.people.map((n) => <span key={n}>{n}</span>)}</p>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
 
-          <div class="row">
-            <div class="art a-tide" role="img" aria-label="Rippling tide pattern"></div>
-            <div><h3>Tidepool Tactics</h3><p>Turn-based strategy on a shrinking beach.</p></div>
-            <div class="meta">2 players<br>10 min</div>
-            <a class="btn small" href="#">Play</a>
+function Events({ events, onCreate, onRemove, onCalendar }) {
+  return (
+    <Card id="events" title="Upcoming Special Event" footer={<GoLink onClick={onCalendar}>Go to Calendar</GoLink>}>
+      <div className="flex-1 min-h-[16rem] rounded-lg bg-panel border border-line p-4 flex flex-col">
+        {events.length === 0 ? (
+          <div className="flex-1 grid place-content-center justify-items-center gap-4 text-center">
+            <p className="text-muted">No upcoming special events.</p>
+            <button onClick={onCreate} className="bg-accent text-accentfg px-6 py-3 rounded-md font-semibold shadow-lg hover:brightness-110 active:brightness-90 active:scale-[.98] transition">Create Special Event</button>
           </div>
-          <div class="row">
-            <div class="art a-brick" role="img" aria-label="Red brick wall"></div>
-            <div><h3>Brickyard Bash</h3><p>Party brawler. Knock friends off the scaffolding.</p></div>
-            <div class="meta">2 to 8 players<br>5 min</div>
-            <a class="btn small" href="#">Play</a>
-          </div>
-          <div class="row">
-            <div class="art a-glimmer" role="img" aria-label="Yellow and white checkerboard"></div>
-            <div><h3>Glimmer Grid</h3><p>Slide tiles to light up the whole board. New puzzle daily.</p></div>
-            <div class="meta">Solo<br>3 min</div>
-            <a class="btn small" href="#">Play</a>
-          </div>
-          <div class="row">
-            <div class="art a-rocket" role="img" aria-label="Striped racing pattern"></div>
-            <div><h3>Rocket Derby</h3><p>Six-racer sprints through asteroid fields.</p></div>
-            <div class="meta">Up to 6 players<br>4 min</div>
-            <a class="btn small" href="#">Play</a>
-          </div>
-          <div class="row">
-            <div class="art a-moth" role="img" aria-label="A moth drawn to a bright light"></div>
-            <div><h3>Mothlight</h3><p>Stealth platformer. Stay out of the beam.</p></div>
-            <div class="meta">Solo<br>20 min</div>
-            <a class="btn small" href="#">Play</a>
-          </div>
-        </div>
-      </section>
+        ) : (
+          <>
+            <ul className="slim flex-1 max-h-[20rem] overflow-y-auto space-y-3 pr-1">
+              {events.map((e) => (
+                <li key={e.id} className="flex items-start gap-3 border border-line rounded-lg bg-card p-3">
+                  <span className="shrink-0 w-14 text-center bg-accent text-accentfg py-1.5 font-display leading-none">
+                    <span className="block text-2xl font-extrabold tabular-nums">{e.date.slice(8, 10)}</span>
+                    <span className="block text-xs font-bold uppercase tracking-wider">{new Date(e.date + "T00:00:00").toLocaleDateString("en-GB", { month: "short" })}</span>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display text-xl font-bold leading-tight">{e.name}</span>
+                    <span className="block text-sm text-muted">{e.venue || "Venue to be announced"} · {fmtDate(e.date)}</span>
+                  </span>
+                  <button onClick={() => onRemove(e.id)} aria-label={`Remove ${e.name}`} className="p-1.5 text-muted hover:text-heel transition-colors"><Icon d={I.trash} size={18} /></button>
+                </li>
+              ))}
+            </ul>
+            <button onClick={onCreate} className="mt-4 w-full border border-accent text-accent py-2.5 rounded-md font-semibold hover:bg-accent hover:text-accentfg transition-colors">Create Special Event</button>
+          </>
+        )}
+      </div>
+    </Card>
+  );
+}
 
-      <section class="block split" id="scores" aria-labelledby="scores-h">
-        <div>
-          <h2 id="scores-h">Top scores this week</h2>
-          <div class="panel scores">
-            <table>
-              <caption>Spark Rush, week of 23 November</caption>
-              <thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col">Squares hit</th></tr></thead>
-              <tbody>
-                <tr class="leader"><td>1</td><td>Tamsin_K</td><td>31</td></tr>
-                <tr><td>2</td><td>ofentse</td><td>29</td></tr>
-                <tr><td>3</td><td>DuskPilot</td><td>28</td></tr>
-                <tr><td>4</td><td>bokkie</td><td>26</td></tr>
-                <tr><td>5</td><td>nine_lives</td><td>25</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="events">
-          <h2>Next event</h2>
-          <div class="panel event">
-            <div class="date">Fri 4 Dec</div>
-            <h3>Rocket Derby tournament</h3>
-            <p>Up to six racers per heat, and the top two advance. Free to enter. Starts at 20:00 SAST.</p>
-            <a class="btn hot" href="#">Save my spot</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="block" id="loadtest" aria-labelledby="lt-h" hidden>
-        <h2 id="lt-h">Load test</h2>
-        <div class="panel lt">
-          <p>Sends repeated requests from this browser tab and shows how the server copes. Use it only on your own site. One tab can't generate heavy traffic, so use k6 for a serious test.</p>
-          <form id="lt-form" class="controls">
-            <label>Target
-              <select id="lt-target">
-                <option value="health.txt">Health check (tiny file)</option>
-                <option value="index.html">Home page</option>
-              </select>
-            </label>
-            <label>Parallel requests: <output id="lt-conc-out">10</output>
-              <input id="lt-conc" type="range" min="1" max="50" value="10">
-            </label>
-            <label>Duration
-              <select id="lt-dur">
-                <option value="10">10 seconds</option>
-                <option value="30">30 seconds</option>
-                <option value="60">60 seconds</option>
-              </select>
-            </label>
-            <div class="actions">
-              <button type="submit" id="lt-start" class="btn">Start test</button>
-              <button type="button" id="lt-stop" class="btn hot" disabled>Stop</button>
-            </div>
-          </form>
-          <div class="stats" aria-live="polite">
-            <div><b id="s-sent">0</b><small>requests</small></div>
-            <div><b id="s-rps">0</b><small>per second</small></div>
-            <div><b id="s-avg">–</b><small>avg ms</small></div>
-            <div><b id="s-p95">–</b><small>p95 ms</small></div>
-            <div><b id="s-err">0</b><small>errors</small></div>
-          </div>
-          <h3 style="margin-top:20px">Servers that answered</h3>
-          <ul id="s-servers"><li>Run a test to see them.</li></ul>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <footer>
-    <div class="wrap">
-      <p>Coinslot. Games for short breaks.</p>
-      <dl>
-        <div><dt>Server</dt><dd id="served-by">checking…</dd></div>
-        <div><dt>Version</dt><dd id="version">checking…</dd></div>
-        <div><dt>Health</dt><dd id="health">checking…</dd></div>
-      </dl>
+/* ---------- Dialogs ---------- */
+function Modal({ label, onClose, children, wide }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const prevFocus = document.activeElement;
+    ref.current && ref.current.focus();
+    const esc = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", esc);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", esc); document.body.style.overflow = prev; prevFocus && prevFocus.focus && prevFocus.focus(); };
+  }, []);
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-sm" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={label} className={`rise relative w-full ${wide ? "sm:max-w-2xl" : "sm:max-w-md"} max-h-[92dvh] overflow-y-auto card p-5 sm:p-7 outline-none`}>
+        <button onClick={onClose} aria-label="Close" className="absolute top-3 right-3 grid place-items-center h-10 w-10 hover:bg-accent hover:text-accentfg transition-colors"><Icon d={I.close} /></button>
+        {children}
+      </div>
     </div>
-  </footer>
+  );
+}
 
-  <script>
-    (function () {
-      "use strict";
-      var $ = function (id) { return document.getElementById(id); };
+function EventForm({ onSave, onClose }) {
+  const today = iso(new Date());
+  const [f, setF] = useState({ name: "", date: "", venue: "" });
+  const [err, setErr] = useState({});
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const submit = (e) => {
+    e.preventDefault();
+    const er = {};
+    if (!f.name.trim()) er.name = "Enter a name for the event.";
+    if (!f.date) er.date = "Choose a date.";
+    else if (f.date < today) er.date = "Choose today or a future date.";
+    setErr(er);
+    if (Object.keys(er).length) return;
+    onSave({ id: Date.now().toString(36), name: f.name.trim(), date: f.date, venue: f.venue.trim() });
+  };
+  const field = "w-full bg-bg border px-3 py-2.5 text-base focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors";
+  return (
+    <Modal label="Create special event" onClose={onClose}>
+      <h2 className="font-display text-3xl font-bold uppercase tracking-[0.12em] pr-10">Create Special Event</h2>
+      <span className="block mt-3 mb-5 h-[3px] w-12 bg-accent" />
+      <form onSubmit={submit} noValidate className="space-y-4">
+        <div>
+          <label htmlFor="ev-name" className="block text-sm font-medium mb-1">Event name</label>
+          <input id="ev-name" value={f.name} onChange={set("name")} placeholder="Backyard Mania 2026" aria-invalid={!!err.name} className={`${field} ${err.name ? "border-heel" : "border-line"}`} />
+          {err.name && <p className="mt-1 text-sm text-heel">{err.name}</p>}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="ev-date" className="block text-sm font-medium mb-1">Date</label>
+            <input id="ev-date" type="date" min={today} value={f.date} onChange={set("date")} aria-invalid={!!err.date} className={`${field} ${err.date ? "border-heel" : "border-line"}`} />
+            {err.date && <p className="mt-1 text-sm text-heel">{err.date}</p>}
+          </div>
+          <div>
+            <label htmlFor="ev-venue" className="block text-sm font-medium mb-1">Venue <span className="text-muted font-normal">(optional)</span></label>
+            <input id="ev-venue" value={f.venue} onChange={set("venue")} placeholder="Johannesburg Arena" className={`${field} border-line`} />
+          </div>
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button type="submit" className="flex-1 bg-accent text-accentfg py-3 rounded-md font-semibold hover:brightness-110 active:brightness-90 transition">Save event</button>
+          <button type="button" onClick={onClose} className="px-5 py-3 rounded-md border border-line text-muted hover:text-fg hover:border-fg transition-colors">Cancel</button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
 
-      /* ============ Spark Rush ============ */
-      var N = 16, ROUND = 20; // squares, seconds
-      var board = $("board"), cells = [];
-      for (var i = 0; i < N; i++) {
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = "cell";
-        b.disabled = true;
-        b.setAttribute("aria-label", "Square " + (i + 1));
-        board.appendChild(b);
-        cells.push(b);
-      }
+function CalendarDialog({ events, onClose }) {
+  const now = new Date();
+  const [cursor, setCursor] = useState(new Date(now.getFullYear(), now.getMonth(), 1));
+  const [sel, setSel] = useState(iso(now));
+  const y = cursor.getFullYear(), m = cursor.getMonth();
+  const lead = (new Date(y, m, 1).getDay() + 6) % 7;
+  const count = new Date(y, m + 1, 0).getDate();
+  const cells = [...Array(lead).fill(null), ...Array.from({ length: count }, (_, i) => i + 1)];
+  const key = (d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+  const byDate = {};
+  events.forEach((e) => { (byDate[e.date] = byDate[e.date] || []).push(e); });
+  const move = (n) => setCursor(new Date(y, m + n, 1));
+  const todays = byDate[sel] || [];
+  return (
+    <Modal label="Event calendar" onClose={onClose} wide>
+      <h2 className="font-display text-3xl font-bold uppercase tracking-[0.12em] pr-10">Calendar</h2>
+      <span className="block mt-3 mb-5 h-[3px] w-12 bg-accent" />
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={() => move(-1)} aria-label="Previous month" className="grid place-items-center h-10 w-10 border border-line hover:border-accent hover:text-accent transition-colors"><Icon d={I.left} /></button>
+        <p className="font-display text-2xl font-bold uppercase tracking-wider" aria-live="polite">{cursor.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</p>
+        <button onClick={() => move(1)} aria-label="Next month" className="grid place-items-center h-10 w-10 border border-line hover:border-accent hover:text-accent transition-colors"><Icon d={I.right} /></button>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i} className="py-1 text-xs font-semibold uppercase tracking-wider text-muted">{d}</span>)}
+        {cells.map((d, i) => {
+          if (!d) return <span key={i} />;
+          const k = key(d), has = byDate[k], on = k === sel, isToday = k === iso(now);
+          return (
+            <button key={i} onClick={() => setSel(k)} aria-pressed={on} aria-label={`${fmtDate(k)}${has ? `, ${has.length} event${has.length > 1 ? "s" : ""}` : ""}`}
+              className={`relative aspect-square grid place-items-center text-base tabular-nums border transition-colors ${on ? "bg-accent text-accentfg border-accent font-bold" : isToday ? "border-accent text-accent" : "border-transparent hover:border-line"}`}>
+              {d}
+              {has && <span className={`absolute bottom-1.5 h-1.5 w-1.5 rounded-full ${on ? "bg-accentfg" : "bg-gold"}`} />}
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-5 border-t border-line pt-4">
+        <h3 className="font-display text-xl font-bold uppercase tracking-wide mb-2">{fmtDate(sel)}</h3>
+        {todays.length ? (
+          <ul className="space-y-1.5">{todays.map((e) => <li key={e.id}><span className="font-medium">{e.name}</span> <span className="text-muted">· {e.venue || "Venue to be announced"}</span></li>)}</ul>
+        ) : <p className="text-muted">No events on this day.</p>}
+      </div>
+    </Modal>
+  );
+}
 
-      var g = { on: false, score: 0, misses: 0, lit: -1, timer: null };
-      var best = 0;
-      try { best = parseInt(localStorage.getItem("coinslot-sparkrush-best"), 10) || 0; } catch (e) {}
-      $("g-best").textContent = best;
+/* ---------- Footer ---------- */
+function Footer() {
+  return (
+    <footer className="mt-20 bg-nav text-navfg border-t border-line">
+      <div className="gut">
+        <div className="cap py-12 grid gap-10 grid-cols-2 md:grid-cols-5">
+          {Object.entries(FOOT).map(([h, links]) => (
+            <div key={h}>
+              <h3 className="font-display text-xl font-bold uppercase tracking-wide mb-3">{h}</h3>
+              <ul className="space-y-2">
+                {links.map((l) => <li key={l}><a href="#" onClick={(e) => e.preventDefault()} className="text-sm text-[#9aa79c] hover:text-white transition-colors">{l}</a></li>)}
+              </ul>
+            </div>
+          ))}
+          <div className="col-span-2 md:col-span-1">
+            <h3 className="font-display text-xl font-bold uppercase tracking-wide mb-3">Global Sites</h3>
+            <p className="text-sm text-[#9aa79c]">Available in English, Spanish and Arabic.</p>
+          </div>
+        </div>
+        <div className="cap border-t border-line py-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span className="flex items-center gap-2 font-display text-2xl font-extrabold tracking-wide"><span className="inline-block h-5 w-2 -skew-x-12 bg-accent" aria-hidden="true" />BCW</span>
+          <p className="text-xs text-[#9aa79c]">© BCW. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
-      function lightNext() {
-        var n;
-        do { n = Math.floor(Math.random() * N); } while (n === g.lit);
-        if (g.lit >= 0) cells[g.lit].classList.remove("lit");
-        g.lit = n;
-        cells[n].classList.add("lit");
-        cells[n].setAttribute("aria-label", "Square " + (n + 1) + ", glowing");
-      }
+/* ---------- App ---------- */
+function App() {
+  const [events, setEvents] = useState(loadEvents);
+  const [dialog, setDialog] = useState(null);
+  const today = iso(new Date());
+  const upcoming = useMemo(() => events.filter((e) => e.date >= today).sort((a, b) => a.date.localeCompare(b.date)), [events]);
 
-      function setCells(enabled) {
-        cells.forEach(function (c, k) {
-          c.disabled = !enabled;
-          c.setAttribute("aria-label", "Square " + (k + 1));
-        });
-      }
+  const update = (list) => { setEvents(list); saveEvents(list); };
+  const toggleTheme = () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : !window.matchMedia("(prefers-color-scheme: light)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  };
 
-      function finish() {
-        clearInterval(g.timer);
-        g.on = false;
-        if (g.lit >= 0) cells[g.lit].classList.remove("lit");
-        g.lit = -1;
-        setCells(false);
-        $("g-time").textContent = "0.0";
-        var shots = g.score + g.misses;
-        var acc = shots ? Math.round(g.score / shots * 100) : 0;
-        var text = "Time's up. You hit " + g.score + " squares with " + acc + "% accuracy.";
-        if (g.score > best) {
-          best = g.score;
-          $("g-best").textContent = best;
-          try { localStorage.setItem("coinslot-sparkrush-best", String(best)); } catch (e) {}
-          text += " That's a new best.";
-        }
-        $("msg").textContent = text;
-        var s = $("g-start");
-        s.textContent = "Play again";
-        s.disabled = false;
-        s.focus();
-      }
+  return (
+    <>
+      <Header onToggleTheme={toggleTheme} />
+      <main>
+        <Band upcoming={upcoming.length} />
+        <div className="gut">
+          <div className="cap py-8 sm:py-10 space-y-5 sm:space-y-6">
+            <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
+              <RosterSnapshot />
+              <Divisions />
+            </div>
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-4">
+              <Champions />
+              <Rankings />
+              <Stories />
+              <Events events={upcoming} onCreate={() => setDialog("form")} onRemove={(id) => update(events.filter((e) => e.id !== id))} onCalendar={() => setDialog("calendar")} />
+            </div>
+          </div>
+        </div>
+      </main>
+      <Footer />
+      {dialog === "form" && <EventForm onClose={() => setDialog(null)} onSave={(ev) => { update([...events, ev]); setDialog(null); }} />}
+      {dialog === "calendar" && <CalendarDialog events={events} onClose={() => setDialog(null)} />}
+    </>
+  );
+}
 
-      $("g-start").addEventListener("click", function () {
-        g.score = 0; g.misses = 0; g.lit = -1; g.on = true;
-        $("g-score").textContent = "0";
-        $("g-time").textContent = ROUND.toFixed(1);
-        $("msg").textContent = "Go!";
-        this.disabled = true;
-        setCells(true);
-        lightNext();
-        var endAt = performance.now() + ROUND * 1000;
-        g.timer = setInterval(function () {
-          var left = Math.max(0, (endAt - performance.now()) / 1000);
-          $("g-time").textContent = left.toFixed(1);
-          if (left <= 0) finish();
-        }, 100);
-      });
-
-      board.addEventListener("click", function (e) {
-        var c = e.target.closest ? e.target.closest(".cell") : null;
-        if (!g.on || !c) return;
-        if (cells.indexOf(c) === g.lit) {
-          g.score++;
-          $("g-score").textContent = g.score;
-          lightNext();
-        } else {
-          g.misses++;
-        }
-      });
-
-      /* ============ Server status (footer) ============ */
-      function servedBy(res) { return res.headers.get("x-served-by") || "not reported"; }
-
-      fetch("health.txt?t=" + Date.now(), { cache: "no-store" })
-        .then(function (r) {
-          $("served-by").textContent = servedBy(r);
-          $("health").textContent = r.ok ? "OK" : "Problem (HTTP " + r.status + ")";
-        })
-        .catch(function () {
-          $("served-by").textContent = "unknown";
-          $("health").textContent = "Unreachable";
-        });
-
-      fetch("version.txt?t=" + Date.now(), { cache: "no-store" })
-        .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
-        .then(function (t) { $("version").textContent = t.trim().slice(0, 7); })
-        .catch(function () { $("version").textContent = "not set"; });
-
-      /* ============ Load test (only visible with ?loadtest) ============ */
-      if (/[?&]loadtest\b/.test(location.search)) $("loadtest").hidden = false;
-
-      var running = false, MAX_SAMPLES = 100000;
-
-      $("lt-conc").addEventListener("input", function () { $("lt-conc-out").textContent = this.value; });
-
-      function percentile(sorted, p) {
-        if (!sorted.length) return null;
-        return sorted[Math.max(0, Math.min(sorted.length - 1, Math.ceil(p / 100 * sorted.length) - 1))];
-      }
-
-      function render(stats, secs) {
-        var sorted = stats.lat.slice().sort(function (a, b) { return a - b; });
-        var avg = sorted.length ? sorted.reduce(function (a, b) { return a + b; }, 0) / sorted.length : null;
-        var p95 = percentile(sorted, 95);
-        $("s-sent").textContent = stats.sent;
-        $("s-rps").textContent = secs > 0 ? (stats.sent / secs).toFixed(1) : "0";
-        $("s-avg").textContent = avg === null ? "–" : Math.round(avg);
-        $("s-p95").textContent = p95 === null ? "–" : Math.round(p95);
-        $("s-err").textContent = stats.errors;
-
-        var list = $("s-servers");
-        list.textContent = "";
-        var names = Object.keys(stats.servers).sort();
-        if (!names.length) {
-          var empty = document.createElement("li");
-          empty.textContent = "No responses yet.";
-          list.appendChild(empty);
-          return;
-        }
-        names.forEach(function (name) {
-          var li = document.createElement("li");
-          var a = document.createElement("span");
-          var c = document.createElement("span");
-          a.textContent = name;                       // textContent: header values never become HTML
-          c.textContent = stats.servers[name] + " requests";
-          li.appendChild(a); li.appendChild(c);
-          list.appendChild(li);
-        });
-      }
-
-      async function worker(url, endAt, stats) {
-        while (running && performance.now() < endAt) {
-          var t0 = performance.now();
-          try {
-            var r = await fetch(url + "?lt=" + Math.random().toString(36).slice(2), { cache: "no-store" });
-            await r.arrayBuffer();
-            stats.sent++;
-            if (stats.lat.length < MAX_SAMPLES) stats.lat.push(performance.now() - t0);
-            if (!r.ok) stats.errors++;
-            var s = servedBy(r);
-            stats.servers[s] = (stats.servers[s] || 0) + 1;
-          } catch (e) {
-            stats.sent++; stats.errors++;
-          }
-        }
-      }
-
-      function setRunning(on) {
-        running = on;
-        $("lt-start").disabled = on;
-        $("lt-stop").disabled = !on;
-        ["lt-target", "lt-conc", "lt-dur"].forEach(function (id) { $(id).disabled = on; });
-      }
-
-      $("lt-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        if (running) return;
-        var url = $("lt-target").value;
-        var conc = parseInt($("lt-conc").value, 10);
-        var dur = parseInt($("lt-dur").value, 10);
-        var stats = { sent: 0, errors: 0, lat: [], servers: {} };
-        var start = performance.now(), endAt = start + dur * 1000;
-        setRunning(true);
-        var tick = setInterval(function () { render(stats, (performance.now() - start) / 1000); }, 500);
-        var jobs = [];
-        for (var i = 0; i < conc; i++) jobs.push(worker(url, endAt, stats));
-        await Promise.all(jobs);
-        clearInterval(tick);
-        render(stats, (performance.now() - start) / 1000);
-        setRunning(false);
-      });
-
-      $("lt-stop").addEventListener("click", function () { running = false; });
-    })();
-  </script>
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
 </body>
 </html>
