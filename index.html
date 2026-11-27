@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="hero">
-    <p class="eyebrow">Deployed from CoastIT</p>
+    <p class="eyebrow">Deployed from GitHub</p>
     <h1>Hello from the cloud.</h1>
     <p class="lede">This page lives in a Git repository. Every push to <code>main</code> updates the servers behind it, and the fleet grows or shrinks with demand.</p>
     <a class="button" href="#how">How it works</a>
@@ -25,6 +25,59 @@
         <li><strong>Autoscaling</strong> adds VMs under load and removes them when traffic drops.</li>
       </ol>
     </section>
+
+    <section id="status" aria-labelledby="status-h">
+      <h2 id="status-h">Live status</h2>
+      <div class="panel">
+        <dl class="facts">
+          <div><dt>Served by</dt><dd id="served-by">checking…</dd></div>
+          <div><dt>Version</dt><dd id="version">checking…</dd></div>
+          <div><dt>Health check</dt><dd id="health">checking…</dd></div>
+        </dl>
+        <p class="hint">Reload the page a few times. Behind a load balancer with several VMs, <strong>Served by</strong> changes as requests are spread across them. The load balancer also uses <code>/health.txt</code> to decide which VMs are healthy.</p>
+      </div>
+    </section>
+
+    <section id="loadtest" aria-labelledby="load-h">
+      <h2 id="load-h">Mini load test</h2>
+      <div class="panel">
+        <p class="hint first">Sends repeated requests from this browser tab and shows how the server copes. Use it only on your own site. For a heavy test, use a tool like k6 from another machine, because one browser tab can't generate much traffic.</p>
+
+        <form id="lt-form" class="controls">
+          <label>Target
+            <select id="lt-target">
+              <option value="health.txt">Health check (tiny file)</option>
+              <option value="index.html">Home page</option>
+            </select>
+          </label>
+          <label>Parallel requests: <output id="lt-conc-out">10</output>
+            <input id="lt-conc" type="range" min="1" max="50" value="10">
+          </label>
+          <label>Duration
+            <select id="lt-dur">
+              <option value="10">10 seconds</option>
+              <option value="30">30 seconds</option>
+              <option value="60">60 seconds</option>
+            </select>
+          </label>
+          <div class="actions">
+            <button type="submit" id="lt-start" class="button">Start test</button>
+            <button type="button" id="lt-stop" class="button secondary" disabled>Stop</button>
+          </div>
+        </form>
+
+        <div class="stats" aria-live="polite">
+          <div><span class="num" id="s-sent">0</span><span class="lbl">requests</span></div>
+          <div><span class="num" id="s-rps">0</span><span class="lbl">per second</span></div>
+          <div><span class="num" id="s-avg">–</span><span class="lbl">avg ms</span></div>
+          <div><span class="num" id="s-p95">–</span><span class="lbl">p95 ms</span></div>
+          <div><span class="num" id="s-err">0</span><span class="lbl">errors</span></div>
+        </div>
+
+        <h3>Servers that answered</h3>
+        <ul id="s-servers" class="servers"><li class="muted">Run a test to see them.</li></ul>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -32,10 +85,133 @@
   </footer>
 
   <script>
-    fetch("version.txt", { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
-      .then(function (t) { document.getElementById("build").textContent = t.trim().slice(0, 7); })
-      .catch(function () { document.getElementById("build").textContent = "local"; });
+    (function () {
+      "use strict";
+      var $ = function (id) { return document.getElementById(id); };
+
+      // ---- Live status: which server answered, which version, is it healthy ----
+      function servedBy(res) { return res.headers.get("x-served-by") || "not reported"; }
+
+      fetch("health.txt?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) {
+          $("served-by").textContent = servedBy(r);
+          $("health").textContent = r.ok ? "OK" : "Problem (HTTP " + r.status + ")";
+        })
+        .catch(function () {
+          $("served-by").textContent = "unknown";
+          $("health").textContent = "Unreachable";
+        });
+
+      fetch("version.txt?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+        .then(function (t) {
+          var v = t.trim().slice(0, 7);
+          $("version").textContent = v;
+          $("build").textContent = v;
+        })
+        .catch(function () {
+          $("version").textContent = "not set";
+          $("build").textContent = "n/a";
+        });
+
+      // ---- Mini load test ----
+      var running = false;
+      var MAX_SAMPLES = 100000;
+
+      $("lt-conc").addEventListener("input", function () {
+        $("lt-conc-out").textContent = this.value;
+      });
+
+      function percentile(sorted, p) {
+        if (!sorted.length) return null;
+        var i = Math.min(sorted.length - 1, Math.ceil(p / 100 * sorted.length) - 1);
+        return sorted[Math.max(0, i)];
+      }
+
+      function render(stats, elapsedSec) {
+        var sorted = stats.lat.slice().sort(function (a, b) { return a - b; });
+        var avg = sorted.length ? sorted.reduce(function (a, b) { return a + b; }, 0) / sorted.length : null;
+        $("s-sent").textContent = stats.sent;
+        $("s-rps").textContent = elapsedSec > 0 ? (stats.sent / elapsedSec).toFixed(1) : "0";
+        $("s-avg").textContent = avg === null ? "–" : Math.round(avg);
+        var p95 = percentile(sorted, 95);
+        $("s-p95").textContent = p95 === null ? "–" : Math.round(p95);
+        $("s-err").textContent = stats.errors;
+
+        var list = $("s-servers");
+        list.textContent = "";
+        var names = Object.keys(stats.servers).sort();
+        if (!names.length) {
+          var empty = document.createElement("li");
+          empty.className = "muted";
+          empty.textContent = "No responses yet.";
+          list.appendChild(empty);
+          return;
+        }
+        names.forEach(function (name) {
+          var li = document.createElement("li");
+          var a = document.createElement("span");
+          var b = document.createElement("span");
+          a.textContent = name;           // textContent: header values are never treated as HTML
+          b.textContent = stats.servers[name] + " requests";
+          li.appendChild(a);
+          li.appendChild(b);
+          list.appendChild(li);
+        });
+      }
+
+      async function worker(url, endAt, stats) {
+        while (running && performance.now() < endAt) {
+          var t0 = performance.now();
+          try {
+            var r = await fetch(url + "?lt=" + Math.random().toString(36).slice(2), { cache: "no-store" });
+            var ms = performance.now() - t0;
+            stats.sent++;
+            if (stats.lat.length < MAX_SAMPLES) stats.lat.push(ms);
+            if (!r.ok) stats.errors++;
+            var s = servedBy(r);
+            stats.servers[s] = (stats.servers[s] || 0) + 1;
+            await r.arrayBuffer();         // read the body so the connection is reused
+          } catch (e) {
+            stats.sent++;
+            stats.errors++;
+          }
+        }
+      }
+
+      function setRunning(on) {
+        running = on;
+        $("lt-start").disabled = on;
+        $("lt-stop").disabled = !on;
+        ["lt-target", "lt-conc", "lt-dur"].forEach(function (id) { $(id).disabled = on; });
+      }
+
+      $("lt-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (running) return;
+        var url = $("lt-target").value;
+        var conc = parseInt($("lt-conc").value, 10);
+        var dur = parseInt($("lt-dur").value, 10);
+        var stats = { sent: 0, errors: 0, lat: [], servers: {} };
+        var start = performance.now();
+        var endAt = start + dur * 1000;
+
+        setRunning(true);
+        var ticker = setInterval(function () {
+          render(stats, (performance.now() - start) / 1000);
+        }, 500);
+
+        var workers = [];
+        for (var i = 0; i < conc; i++) workers.push(worker(url, endAt, stats));
+        await Promise.all(workers);
+
+        clearInterval(ticker);
+        render(stats, (performance.now() - start) / 1000);
+        setRunning(false);
+      });
+
+      $("lt-stop").addEventListener("click", function () { running = false; });
+    })();
   </script>
 </body>
 </html>
